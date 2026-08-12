@@ -12,6 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Amiri:ital,wght@0,400;0,700;1,400&family=Reem+Kufi:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script>
+/* low-power / small-screen devices get a lighter render path */
+(function(){try{
+  var m = innerWidth < 900
+       || (navigator.hardwareConcurrency||8) <= 4
+       || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(m) document.documentElement.className='lite';
+}catch(e){}})();
+</script>
 <style>
 /* ============================================================
    PALETTE
@@ -30,12 +39,12 @@
 
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0}
-html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; overflow-x:hidden; max-width:100%}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; overflow-x:clip; max-width:100%}
 body{
   background:#100c09;
   color:var(--ink);
   font-family:'Amiri', 'Scheherazade New', serif;
-  overflow-x:hidden;
+  overflow-x:clip; max-width:100vw;
   -webkit-font-smoothing:antialiased;
 }
 body.locked{overflow:hidden;height:100%}
@@ -154,10 +163,18 @@ button{font-family:inherit}
   position:absolute; left:50%; top:-16px; width:11px; height:22px; margin-left:-5.5px;
   border-radius:50% 50% 46% 46%/62% 62% 38% 38%;
   background:radial-gradient(ellipse at 50% 76%, #fff8e2 0%, #ffe2ae 38%, #f3c579 66%, rgba(245,200,130,0) 78%);
-  filter:blur(.5px) drop-shadow(0 0 16px rgba(255,214,150,.85));
   animation:flicker 1.7s ease-in-out infinite alternate;
   transform-origin:50% 100%;
 }
+/* static gradient halo instead of an animated drop-shadow filter */
+.candle .glow{
+  position:absolute; left:50%; top:-44px; width:76px; height:76px; margin-left:-38px;
+  border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,228,176,.62) 0%, rgba(255,216,150,.22) 38%, rgba(255,210,140,0) 70%);
+  animation:glowPulse 2.9s ease-in-out infinite alternate;
+  will-change:opacity;
+}
+@keyframes glowPulse{from{opacity:.55}to{opacity:1}}
 @keyframes flicker{
   0%  {transform:scale(1,1) rotate(-2deg); opacity:.92}
   40% {transform:scale(1.06,.94) rotate(1.5deg); opacity:1}
@@ -174,6 +191,27 @@ button{font-family:inherit}
     radial-gradient(102% 76% at 50% 40%, transparent 30%, rgba(74,60,42,.16) 58%, rgba(56,44,30,.40) 82%, rgba(40,31,21,.60) 100%),
     linear-gradient(to bottom, rgba(58,46,32,.22), transparent 20%);
 }
+
+/* ============================================================
+   LITE MODE — drop the expensive compositing on phones
+   ============================================================ */
+.lite .panel,.lite .card,.lite #openBtn{backdrop-filter:none; -webkit-backdrop-filter:none}
+.lite .panel{background:linear-gradient(180deg,#fdfaf3,#f8f3e9)}
+.lite .card{background:linear-gradient(180deg,#fdfaf4,#f7f2e7)}
+.lite #hall{animation:none}
+.lite .drape{display:none}
+.lite .shaft{filter:blur(14px); mix-blend-mode:normal; opacity:.34; animation:none}
+.lite .chandelier .halo{mix-blend-mode:normal; animation:none; opacity:.8}
+.lite .floor::after{filter:blur(18px)}
+.lite .florals .mist{filter:blur(9px)}
+.lite .florals .blob,.lite .arch .bl,.lite .arch .lf{filter:none !important}
+.lite .medallion::before{animation:none; opacity:.8}
+.lite .medallion .lace{filter:drop-shadow(0 12px 22px rgba(52,48,38,.22))}
+.lite .card{transition:none}
+.lite .card:hover{transform:none; box-shadow:0 18px 44px rgba(52,48,38,.16)}
+.lite .amp{animation:none}
+.lite section{min-height:auto; padding:11vh 6vw}
+.lite section.hero{min-height:100svh}
 
 /* ============================================================
    THE GATE  (tap to open)
@@ -200,7 +238,7 @@ button{font-family:inherit}
 .gate-names{
   font-family:'Aref Ruqaa Ink','Amiri',serif; font-weight:700;
   font-size:clamp(38px,11.5vw,88px); line-height:1.3; margin:0 0 6px;
-  white-space:nowrap;
+  max-width:100%;
   background:linear-gradient(100deg,#7d7249 0%,#e3d7b0 26%,#fffbee 42%,#d9cfa2 58%,#7d7249 100%);
   background-size:280% 100%;
   -webkit-background-clip:text; background-clip:text; color:transparent;
@@ -234,7 +272,7 @@ button{font-family:inherit}
 /* ============================================================
    CONTENT
    ============================================================ */
-main{position:relative; z-index:10}
+main{position:relative; z-index:10; width:100%; max-width:100vw; overflow-x:clip}
 section{
   min-height:100svh; display:grid; place-items:center;
   padding:14vh 6vw; position:relative;
@@ -243,7 +281,7 @@ section.tight{min-height:auto; padding:10vh 6vw}
 
 /* ---- the lace medallion ---- */
 .medallion{
-  position:relative; width:min(92vw,560px); aspect-ratio:1/1.26;
+  position:relative; width:min(100%,560px); aspect-ratio:1/1.26;
   display:grid; place-items:center; margin-inline:auto;
 }
 .medallion .lace{position:absolute; inset:0; filter:drop-shadow(0 22px 44px rgba(52,48,38,.28))}
@@ -280,9 +318,9 @@ section.tight{min-height:auto; padding:10vh 6vw}
   display:flex; align-items:center; justify-content:center; gap:clamp(6px,2.4vw,22px);
   margin:clamp(16px,5vw,32px) 0 clamp(12px,4vw,22px);
   font-size:clamp(40px,12.5vw,92px);
-  white-space:nowrap; max-width:100%;
+  flex-wrap:wrap; max-width:100%;
 }
-.names>*{flex:0 0 auto}
+.names>*{flex:0 0 auto; white-space:nowrap}
 .name{
   font-family:'Aref Ruqaa Ink','Amiri',serif; font-weight:700;
   font-size:1em; line-height:1.15;
@@ -313,7 +351,7 @@ section.tight{min-height:auto; padding:10vh 6vw}
 
 /* ---- panels ---- */
 .panel{
-  width:min(94vw,720px); margin-inline:auto; text-align:center;
+  width:min(100%,720px); margin-inline:auto; text-align:center;
   background:linear-gradient(180deg, rgba(255,253,248,.90), rgba(253,249,241,.80));
   border:1px solid rgba(176,166,124,.28);
   border-radius:clamp(16px,4vw,26px);
@@ -344,7 +382,7 @@ h2.title{
 
 /* ---- detail cards ---- */
 .cards{
-  display:grid; gap:clamp(12px,3vw,18px); width:min(94vw,860px); margin-inline:auto;
+  display:grid; gap:clamp(12px,3vw,18px); width:min(100%,860px); margin-inline:auto;
   grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
 }
 .card{
@@ -775,19 +813,22 @@ body.opened main{opacity:1; transition:opacity .8s ease}
    2. FLORALS + CANDLES
    ============================================================ */
 (function decor(){
+  const LITE=document.documentElement.classList.contains('lite');
   const fl=document.getElementById('florals');
   const rnd=(a,b)=>a+Math.random()*(b-a);
-  for(let i=0;i<70;i++){
+  const blur=v=>LITE?'':`filter:blur(${v}px)`;
+  for(let i=0;i<(LITE?26:70);i++){
     const d=document.createElement('div'); d.className='blob';
     const s=rnd(10,46);
-    d.style.cssText=`width:${s}px;height:${s}px;left:${rnd(-4,104)}%;bottom:${rnd(-6,62)}%;opacity:${rnd(.35,.95)};filter:blur(${rnd(0,2.6)}px)`;
+    d.style.cssText=`width:${s}px;height:${s}px;left:${rnd(-4,104)}%;bottom:${rnd(-6,62)}%;opacity:${rnd(.35,.95)};${blur(rnd(0,2.6))}`;
     fl.appendChild(d);
   }
   // floral arch: blossoms sweeping down from both top corners
   const arch=document.getElementById('arch');
   for(let side=0; side<2; side++){
-    for(let i=0;i<52;i++){
-      const t=i/51;                                  // 0 = corner, 1 = toward centre
+    const AN=LITE?20:52;
+    for(let i=0;i<AN;i++){
+      const t=i/(AN-1);                                  // 0 = corner, 1 = toward centre
       const x = side ? 100 - (t*46 + rnd(-3,3)) : (t*46 + rnd(-3,3));
       const y = Math.pow(t,1.7)*72 + rnd(-6,6);      // curve down and inward
       const s = rnd(7,26)*(1-t*0.40);
@@ -795,19 +836,20 @@ body.opened main{opacity:1; transition:opacity .8s ease}
       d.className = i%9===0 ? 'lf' : 'bl';
       d.style.cssText=`width:${s}px;height:${s*(d.className==='lf'?.55:1)}px;`+
         `left:${x}%;top:${y}%;opacity:${rnd(.28,.82)};`+
-        `filter:blur(${rnd(0,2.4)}px);transform:rotate(${rnd(0,360)}deg)`;
+        `${blur(rnd(0,2.4))};transform:rotate(${rnd(0,360)}deg)`;
       arch.appendChild(d);
     }
   }
 
   const cn=document.getElementById('candles');
-  const spots=[4,9,15,22,30,70,78,85,91,96];
+  const spots=LITE?[5,13,23,32,72,84,94]:[4,9,15,22,30,70,78,85,91,96];
   spots.forEach((p,i)=>{
     const c=document.createElement('div'); c.className='candle';
     c.style.left=p+'%';
     c.style.bottom=(-2+ (i%3)*3)+'%';
     c.style.transform=`scale(${0.8+ (i%4)*0.13})`;
-    c.innerHTML='<div class="flame" style="animation-delay:'+(i*0.23).toFixed(2)+'s"></div><div class="wax"></div>';
+    c.innerHTML='<div class="glow" style="animation-delay:'+(i*0.31).toFixed(2)+'s"></div>'+
+                '<div class="flame" style="animation-delay:'+(i*0.23).toFixed(2)+'s"></div><div class="wax"></div>';
     cn.appendChild(c);
   });
 })();
@@ -816,13 +858,14 @@ body.opened main{opacity:1; transition:opacity .8s ease}
    3. PETALS
    ============================================================ */
 (function petals(){
-  const cv=document.getElementById('petals'), ctx=cv.getContext('2d');
+  const LITE=document.documentElement.classList.contains('lite');
+  const cv=document.getElementById('petals'), ctx=cv.getContext('2d',{alpha:true});
   let W,H,DPR,parts=[],raf=null;
   const COLORS=['rgba(255,255,255,','rgba(252,246,235,','rgba(244,232,213,','rgba(238,224,203,'];
   const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 
   function size(){
-    DPR=Math.min(devicePixelRatio||1,2);
+    DPR=Math.min(devicePixelRatio||1, document.documentElement.classList.contains('lite')?1.5:2);
     W=cv.width=innerWidth*DPR; H=cv.height=innerHeight*DPR;
     cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
   }
@@ -844,9 +887,9 @@ body.opened main{opacity:1; transition:opacity .8s ease}
   }
   function init(){
     size();
-    const n = innerWidth<620 ? 34 : 62;
-    parts=Array.from({length:n},()=>make());
-    stars=Array.from({length: innerWidth<620?18:34},makeStar);
+    const LITE=document.documentElement.classList.contains('lite');
+    parts=Array.from({length: LITE?20:62},()=>make());
+    stars=Array.from({length: LITE?10:34},makeStar);
   }
   function drawStar(s){
     const a=(Math.sin(s.ph)*.5+.5);
@@ -878,11 +921,12 @@ body.opened main{opacity:1; transition:opacity .8s ease}
       ctx.beginPath();
       ctx.ellipse(0,0,p.s,p.s*p.squash,0,0,Math.PI*2);
       ctx.fill();
-      // soft inner highlight
-      ctx.fillStyle='rgba(255,255,255,'+(p.a*.5)+')';
-      ctx.beginPath();
-      ctx.ellipse(-p.s*.22,-p.s*.12,p.s*.42,p.s*p.squash*.42,0,0,Math.PI*2);
-      ctx.fill();
+      if(!LITE){
+        ctx.fillStyle='rgba(255,255,255,'+(p.a*.5)+')';
+        ctx.beginPath();
+        ctx.ellipse(-p.s*.22,-p.s*.12,p.s*.42,p.s*p.squash*.42,0,0,Math.PI*2);
+        ctx.fill();
+      }
       ctx.restore();
     }
     raf=requestAnimationFrame(draw);
@@ -893,6 +937,14 @@ body.opened main{opacity:1; transition:opacity .8s ease}
          ctx.fillStyle=p.c+p.a+')'; ctx.beginPath();
          ctx.ellipse(0,0,p.s,p.s*p.squash,0,0,Math.PI*2); ctx.fill(); ctx.restore(); } }
   addEventListener('resize',()=>{init();},{passive:true});
+  if(LITE){
+    let idle=false;
+    addEventListener('scroll',()=>{
+      const past=scrollY>innerHeight*1.2;
+      if(past&&!idle){idle=true; if(raf){cancelAnimationFrame(raf);raf=null;}}
+      else if(!past&&idle){idle=false; if(!raf)raf=requestAnimationFrame(draw);}
+    },{passive:true});
+  }
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){cancelAnimationFrame(raf);raf=null;}
     else if(!raf && !reduce){raf=requestAnimationFrame(draw);}
